@@ -1,4 +1,9 @@
-package com.unid8.damideo.question;
+package com.unid8.damideo.question.dto;
+
+import com.unid8.damideo.question.AnswerPos;
+import com.unid8.damideo.question.Question;
+import com.unid8.damideo.question.QuestionCategory;
+import com.unid8.damideo.question.QuestionTacticNames;
 
 /**
  * 데일리·실전 판 답 제출 시 반환하는 공통 정답 공개 응답.
