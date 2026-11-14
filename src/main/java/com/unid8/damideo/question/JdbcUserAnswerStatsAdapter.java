@@ -1,7 +1,12 @@
 package com.unid8.damideo.question;
 
+import com.unid8.damideo.answer.FirstAttemptReader;
+import com.unid8.damideo.answer.FirstAttemptReader.FirstAttempts;
+import com.unid8.damideo.stats.WeaknessTypeJudge;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,10 +18,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class JdbcUserAnswerStatsAdapter implements UserAnswerStatsPort {
 
-    private final JdbcTemplate jdbcTemplate;
+    private static final List<String> CATEGORY_ORDER =
+            Arrays.stream(QuestionCategory.values()).map(Enum::name).toList();
 
-    public JdbcUserAnswerStatsAdapter(JdbcTemplate jdbcTemplate) {
+    private final JdbcTemplate jdbcTemplate;
+    private final FirstAttemptReader firstAttemptReader;
+
+    public JdbcUserAnswerStatsAdapter(JdbcTemplate jdbcTemplate, FirstAttemptReader firstAttemptReader) {
         this.jdbcTemplate = jdbcTemplate;
+        this.firstAttemptReader = firstAttemptReader;
     }
 
     @Override
@@ -45,33 +55,15 @@ public class JdbcUserAnswerStatsAdapter implements UserAnswerStatsPort {
         return new UserQuestionHistory(wrongIds, correctIds);
     }
 
+    /**
+     * 계열별로 처음 푼 답 중 최근 6문제의 정답률. 유형 판정과 같은 기준이다.
+     */
     @Override
     public Map<QuestionCategory, Double> findCategoryAccuracies(Long userId) {
+        FirstAttempts attempts = firstAttemptReader.read(userId);
+        Map<String, Double> accuracies = WeaknessTypeJudge.accuracies(CATEGORY_ORDER, attempts.byCategory());
         Map<QuestionCategory, Double> result = new EnumMap<>(QuestionCategory.class);
-        jdbcTemplate.query(
-                """
-                SELECT q.category,
-                       SUM(CASE WHEN a.is_correct = 1 THEN 1 ELSE 0 END) AS correct_cnt,
-                       COUNT(*) AS total_cnt
-                FROM answers a
-                JOIN questions q ON q.id = a.question_id
-                WHERE a.user_id = ? AND a.first_attempt = 1
-                GROUP BY q.category
-                """,
-                rs -> {
-                    String catStr = rs.getString("category");
-                    long total = rs.getLong("total_cnt");
-                    long correct = rs.getLong("correct_cnt");
-                    if (total > 0) {
-                        try {
-                            result.put(QuestionCategory.valueOf(catStr), (double) correct / total);
-                        } catch (IllegalArgumentException ignored) {
-                            // 알 수 없는 카테고리 코드는 건너뛴다.
-                        }
-                    }
-                },
-                userId
-        );
+        accuracies.forEach((category, accuracy) -> result.put(QuestionCategory.valueOf(category), accuracy));
         return result;
     }
 }
