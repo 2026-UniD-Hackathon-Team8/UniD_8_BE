@@ -82,6 +82,11 @@ public class User {
         this.candidateSince = candidateSince;
     }
 
+    public void updateBestStreak(int wins, LocalDateTime achievedAt) {
+        this.bestStreakWin = wins;
+        this.bestStreakWinAt = achievedAt;
+    }
+
     public void changeNickname(String nickname) {
         this.nickname = nickname;
     }
