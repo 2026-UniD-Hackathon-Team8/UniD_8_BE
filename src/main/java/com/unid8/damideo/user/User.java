@@ -70,6 +70,10 @@ public class User {
         return new User(deviceId, nickname);
     }
 
+    public void changeNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
     @PrePersist
     void onCreate() {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
