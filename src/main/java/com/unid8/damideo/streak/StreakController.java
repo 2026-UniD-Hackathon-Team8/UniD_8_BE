@@ -2,6 +2,7 @@ package com.unid8.damideo.streak;
 
 import com.unid8.damideo.common.auth.CurrentUser;
 import com.unid8.damideo.common.response.ApiResponse;
+import com.unid8.damideo.streak.dto.DailyRankingResponse;
 import com.unid8.damideo.streak.dto.RankingResponse;
 import com.unid8.damideo.streak.dto.StreakAnswerRequest;
 import com.unid8.damideo.streak.dto.StreakAnswerResponse;
@@ -22,6 +23,7 @@ public class StreakController {
 
     private final StreakChallengeService challengeService;
     private final RankingService rankingService;
+    private final DailyRankingService dailyRankingService;
 
     @Operation(summary = "연승 챌린지 시작", description = "진행 중인 도전이 있으면 끝내고 새로 시작한다. 첫 문제가 함께 온다.")
     @PostMapping("/api/streak-challenges")
@@ -44,5 +46,13 @@ public class StreakController {
                                                 @RequestParam(defaultValue = "20") int size) {
         return ApiResponse.ok("RANKING_SUCCESS", "랭킹을 조회했습니다.",
                 rankingService.getRanking(userId, Math.max(1, Math.min(size, 100))));
+    }
+
+    @Operation(summary = "연속 데일리 랭킹", description = "현재 데일리 연속 일수 내림차순, 같으면 최장 기록이 긴 순. 동점은 같은 순위")
+    @GetMapping("/api/rankings/daily")
+    public ApiResponse<DailyRankingResponse> dailyRanking(@CurrentUser Long userId,
+                                                          @RequestParam(defaultValue = "20") int size) {
+        return ApiResponse.ok("DAILY_RANKING_SUCCESS", "데일리 랭킹을 조회했습니다.",
+                dailyRankingService.getRanking(userId, Math.max(1, Math.min(size, 100))));
     }
 }
