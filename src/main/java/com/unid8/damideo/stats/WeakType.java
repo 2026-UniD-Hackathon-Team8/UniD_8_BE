@@ -10,8 +10,8 @@ public enum WeakType {
     EVIDENCE_TRUSTER("EVIDENCE", "근거 맹신형", "근거가 실제로 있나?"),
     CONTEXT_MISSER("CONTEXT", "맥락 놓침형", "빠진 조건·예외는 없나?"),
     LOGIC_ILLUSION("LOGIC", "논리 착시형", "따져 보면 말이 되나?"),
-    TIMELINE_CONFUSED("TIMELINE", "시점 착각형", "언제 기준인가?"),
-    QUESTION_FOLLOWER("QUESTION", "끌려가기형", "내 질문이 답을 끌고 가지 않았나?"),
+    TIME_CONFUSED("TIMELINE", "시점 착각형", "언제 기준인가?"),
+    LED_ALONG("QUESTION", "끌려가기형", "내 질문이 답을 끌고 가지 않았나?"),
     DETECTIVE(WeaknessTypeJudge.DETECTIVE, "탐정형", null);
 
     private final String storedType;
