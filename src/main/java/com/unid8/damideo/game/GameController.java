@@ -6,7 +6,7 @@ import com.unid8.damideo.game.dto.GameAnswerRequest;
 import com.unid8.damideo.game.dto.GameResultResponse;
 import com.unid8.damideo.game.dto.GameSessionResponse;
 import com.unid8.damideo.game.dto.StartGameRequest;
-import com.unid8.damideo.question.AnswerRevealResponse;
+import com.unid8.damideo.question.dto.AnswerRevealResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

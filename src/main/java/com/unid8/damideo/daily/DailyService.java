@@ -9,7 +9,7 @@ import com.unid8.damideo.daily.dto.DailyResponse.DailyQuestionItem;
 import com.unid8.damideo.daily.dto.DailyResultResponse;
 import com.unid8.damideo.daily.dto.DailyResultResponse.DailyResultItem;
 import com.unid8.damideo.question.AnswerPos;
-import com.unid8.damideo.question.AnswerRevealResponse;
+import com.unid8.damideo.question.dto.AnswerRevealResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
