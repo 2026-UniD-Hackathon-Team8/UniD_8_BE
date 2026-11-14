@@ -65,7 +65,7 @@ public final class WeaknessTypeJudge {
         return TypeJudgement.kept(state.currentType(), candidate, today, accuracies);
     }
 
-    static Map<String, Double> accuracies(List<String> categoryOrder, Map<String, List<Boolean>> firstAttempts) {
+    public static Map<String, Double> accuracies(List<String> categoryOrder, Map<String, List<Boolean>> firstAttempts) {
         Map<String, Double> result = new LinkedHashMap<>();
         for (String category : categoryOrder) {
             List<Boolean> answers = firstAttempts.getOrDefault(category, List.of());
