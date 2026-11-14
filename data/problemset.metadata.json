@@ -1,0 +1,12 @@
+{
+  "version": "1.5",
+  "schemaVersion": 1,
+  "exportedAt": "2026-11-15T03:30:00+09:00",
+  "source": "Notion 문제은행 DB",
+  "sha256": "...",
+  "stats": {
+    "totalRows": 65,
+    "activeRows": 55
+  },
+  "changelog": "v1.5 문제은행 반영"
+}
