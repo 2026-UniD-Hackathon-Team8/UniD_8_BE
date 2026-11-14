@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,9 @@ public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "notion_id", length = 30)
+    private String notionId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -79,5 +83,61 @@ public class Question {
 
     public String optionB(AnswerPos answerPos) {
         return answerPos == AnswerPos.B ? targetContent : credibleContent;
+    }
+
+    public static Question create(String notionId,
+                                  QuestionCategory category,
+                                  String tactic,
+                                  QuestionType questionType,
+                                  String prompt,
+                                  String credibleContent,
+                                  String targetContent,
+                                  String credibleAiAnswer,
+                                  String targetAiAnswer,
+                                  String explanation,
+                                  String checkQuestion,
+                                  String source,
+                                  byte difficulty,
+                                  boolean dailyEligible,
+                                  boolean active) {
+        Question question = new Question();
+        question.notionId = notionId;
+        question.category = category;
+        question.tactic = tactic;
+        question.questionType = questionType;
+        question.prompt = prompt;
+        question.credibleContent = credibleContent;
+        question.targetContent = targetContent;
+        question.credibleAiAnswer = credibleAiAnswer;
+        question.targetAiAnswer = targetAiAnswer;
+        question.explanation = explanation;
+        question.checkQuestion = checkQuestion;
+        question.source = source;
+        question.difficulty = difficulty;
+        question.dailyEligible = dailyEligible;
+        question.active = active;
+        return question;
+    }
+
+    public void deactivate() {
+        this.active = false;
+    }
+
+    public boolean hasSameContent(Question other) {
+        return Objects.equals(notionId, other.notionId)
+                && category == other.category
+                && Objects.equals(tactic, other.tactic)
+                && questionType == other.questionType
+                && Objects.equals(prompt, other.prompt)
+                && Objects.equals(credibleContent, other.credibleContent)
+                && Objects.equals(targetContent, other.targetContent)
+                && Objects.equals(credibleAiAnswer, other.credibleAiAnswer)
+                && Objects.equals(targetAiAnswer, other.targetAiAnswer)
+                && Objects.equals(explanation, other.explanation)
+                && Objects.equals(checkQuestion, other.checkQuestion)
+                && Objects.equals(source, other.source)
+                && difficulty == other.difficulty
+                && dailyEligible == other.dailyEligible
+                && active == other.active;
     }
 }
