@@ -57,7 +57,7 @@ class UserRecordServiceTest {
         assertThat(userRepository.findById(userId).orElseThrow().getCurrentStreak()).isEqualTo(2);
     }
 
-    // 처음 푼 답이 계열마다 4문제가 안 되면 유형을 정하지 않는다
+    // 처음 푼 답이 계열마다 2문제가 안 되면 유형을 정하지 않는다
     @Test
     void completeGame_keepsAnalyzingUntilEnoughAnswers() {
         Long userId = newUser();
@@ -70,7 +70,7 @@ class UserRecordServiceTest {
         assertThat(historyCount(userId)).isZero();
     }
 
-    // 계열마다 4문제를 넘기면 가장 약한 계열로 유형을 정하고 이력을 남긴다
+    // 계열마다 2문제를 넘기면 가장 약한 계열로 유형을 정하고 이력을 남긴다
     @Test
     void completeGame_decidesTypeAndRecordsHistory() {
         Long userId = newUser();

@@ -99,7 +99,7 @@ class ProfileApiTest {
                 .andExpect(jsonPath("$.data.weakType.status").value("ANALYZING"))
                 .andExpect(jsonPath("$.data.weakType.code").isEmpty())
                 .andExpect(jsonPath("$.data.weakType.progress.solved").value(0))
-                .andExpect(jsonPath("$.data.weakType.progress.required").value(20));
+                .andExpect(jsonPath("$.data.weakType.progress.required").value(10));
     }
 
     // 유형이 정해졌으면 유형 카드 정보와 가장 강한 계열을 보여 준다

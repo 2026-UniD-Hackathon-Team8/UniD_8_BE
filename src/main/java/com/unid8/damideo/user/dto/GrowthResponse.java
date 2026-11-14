@@ -21,8 +21,8 @@ public record GrowthResponse(boolean available,
     }
 
     /**
-     * @param early  처음 3회의 정답률(0~1). 그 계열 문제가 없었으면 null
-     * @param recent 최근 3회의 정답률(0~1). 그 계열 문제가 없었으면 null
+     * @param early  처음 회차들의 정답률(0~1). 최대 3회, 회 수가 적으면 절반. 그 계열 문제가 없었으면 null
+     * @param recent 최근 회차들의 정답률(0~1). early와 같은 수, 겹치지 않는다. 그 계열 문제가 없었으면 null
      */
     public record CategoryAccuracy(QuestionCategory category, String categoryName, Double early, Double recent) {
     }

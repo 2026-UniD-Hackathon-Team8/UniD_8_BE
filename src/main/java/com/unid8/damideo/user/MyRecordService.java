@@ -103,8 +103,10 @@ public class MyRecordService {
     }
 
     private static List<CategoryAccuracy> categoryAccuracy(List<Session> sessions) {
-        List<Session> early = sessions.subList(0, COMPARE_SESSIONS);
-        List<Session> recent = sessions.subList(sessions.size() - COMPARE_SESSIONS, sessions.size());
+        // 처음과 최근이 겹치지 않게, 회 수가 적으면 절반씩 비교한다 (3회면 1회 vs 1회, 6회부터 3회 vs 3회)
+        int window = Math.min(COMPARE_SESSIONS, sessions.size() / 2);
+        List<Session> early = sessions.subList(0, window);
+        List<Session> recent = sessions.subList(sessions.size() - window, sessions.size());
 
         List<CategoryAccuracy> result = new ArrayList<>();
         for (QuestionCategory category : QuestionCategory.values()) {

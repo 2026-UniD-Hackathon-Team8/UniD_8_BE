@@ -11,7 +11,7 @@ import java.util.Objects;
  *
  * <ul>
  *   <li>계열마다 처음 푼 답 중 최근 6문제의 정답률을 본다</li>
- *   <li>계열마다 4문제 이상, 전체 20문제 이상일 때 유형을 연다</li>
+ *   <li>계열마다 2문제 이상, 전체 10문제 이상일 때 유형을 연다 (실전 한 판이 계열마다 2문제)</li>
  *   <li>정답률이 가장 낮은 계열이 유형이고, 모든 계열이 80% 이상이면 탐정형</li>
  *   <li>다른 계열이 지금 유형보다 10%p 이상 낮으면 후보로 두고, 다음 날에도 같은 후보면 바꾼다</li>
  * </ul>
@@ -21,8 +21,8 @@ public final class WeaknessTypeJudge {
     public static final String DETECTIVE = "DETECTIVE";
 
     static final int SAMPLE_SIZE = 6;
-    static final int MIN_PER_CATEGORY = 4;
-    static final int MIN_TOTAL = 20;
+    static final int MIN_PER_CATEGORY = 2;
+    public static final int MIN_TOTAL = 10;
     static final double DETECTIVE_ACCURACY = 0.8;
     static final double CHANGE_GAP = 0.1;
     private static final double EPSILON = 1e-9;

@@ -1,6 +1,7 @@
 package com.unid8.damideo.daily;
 
 import com.unid8.damideo.question.AnswerPos;
+import com.unid8.damideo.question.AnswerPositions;
 import com.unid8.damideo.question.Question;
 import com.unid8.damideo.question.QuestionPicker;
 import java.time.LocalDate;
@@ -34,10 +35,11 @@ class DailySetCreator {
         DailySet savedSet = dailySetRepository.saveAndFlush(new DailySet(dailyDate));
         List<Question> picked = questionPicker.pickForDaily(dailyDate);
         Random posRandom = new Random(dailyDate.toEpochDay() * 31L + 7L);
+        List<AnswerPos> positions = AnswerPositions.balanced(picked.size(), posRandom);
 
         for (int i = 0; i < picked.size(); i++) {
-            AnswerPos pos = posRandom.nextBoolean() ? AnswerPos.A : AnswerPos.B;
-            dailySetQuestionRepository.save(new DailySetQuestion(savedSet, picked.get(i), (byte) (i + 1), pos));
+            dailySetQuestionRepository.save(
+                    new DailySetQuestion(savedSet, picked.get(i), (byte) (i + 1), positions.get(i)));
         }
         return savedSet;
     }
