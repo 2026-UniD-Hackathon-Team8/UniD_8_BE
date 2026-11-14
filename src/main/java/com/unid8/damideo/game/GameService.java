@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -78,16 +79,15 @@ public class GameService {
     }
 
     @Transactional(readOnly = true)
-    public GameSessionResponse getCurrentGame(Long userId) {
-        GameSession session = gameSessionRepository
+    public Optional<GameSessionResponse> getCurrentGame(Long userId) {
+        return gameSessionRepository
                 .findFirstByUserIdAndStatusOrderByIdDesc(userId, GameStatus.IN_PROGRESS)
-                .orElseThrow(() -> new BusinessException(GameErrorCode.GAME_SESSION_NOT_FOUND));
-
-        List<GameSessionQuestion> sessionQuestions =
-                gameSessionQuestionRepository.findAllWithQuestionByGameSessionId(session.getId());
-        Map<Long, SubmittedGameAnswer> answers = gameAnswerPort.findAnswers(session.getId());
-
-        return toSessionResponse(session, sessionQuestions, answers);
+                .map(session -> {
+                    List<GameSessionQuestion> sessionQuestions =
+                            gameSessionQuestionRepository.findAllWithQuestionByGameSessionId(session.getId());
+                    Map<Long, SubmittedGameAnswer> answers = gameAnswerPort.findAnswers(session.getId());
+                    return toSessionResponse(session, sessionQuestions, answers);
+                });
     }
 
     @Transactional
