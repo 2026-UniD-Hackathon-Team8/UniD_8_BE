@@ -5,6 +5,7 @@ import com.unid8.damideo.common.auth.DeviceIdInterceptor;
 import java.util.List;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -18,6 +19,15 @@ public class WebConfig implements WebMvcConfigurer {
                      CurrentUserArgumentResolver currentUserArgumentResolver) {
         this.deviceIdInterceptor = deviceIdInterceptor;
         this.currentUserArgumentResolver = currentUserArgumentResolver;
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/api/**")
+                .allowedOriginPatterns("*")
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .maxAge(3600);
     }
 
     @Override
