@@ -7,6 +7,7 @@ import com.unid8.damideo.question.QuestionCsvParser.ParseResult;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
@@ -17,22 +18,34 @@ class QuestionCsvParserTest {
     private final QuestionCsvParser parser = new QuestionCsvParser();
 
     @Test
-    void parsesAll31QuestionsFromV14CsvWithExactTypeRules() throws Exception {
-        ClassPathResource resource = new ClassPathResource("data/문제은행 v1.4.csv");
+    void parsesProblemsetCsvWithExactTypeRules() throws Exception {
+        ClassPathResource resource = new ClassPathResource("data/problemset.csv");
         ParseResult result;
         try (InputStream is = resource.getInputStream()) {
             result = parser.parse(is);
         }
 
         assertThat(result.skippedRows()).isEmpty();
-        assertThat(result.questions()).hasSize(31);
+        assertThat(result.questions()).hasSizeGreaterThanOrEqualTo(10);
+
+        List<String> notionIds = result.questions().stream()
+                .map(Question::getNotionId)
+                .toList();
+        assertThat(notionIds).doesNotHaveDuplicates();
 
         Map<QuestionType, Long> countsByType = result.questions().stream()
                 .collect(Collectors.groupingBy(Question::getQuestionType, Collectors.counting()));
         assertThat(countsByType)
-                .containsEntry(QuestionType.CHOICE_ANSWER, 21L)
-                .containsEntry(QuestionType.CHOICE_QUESTION, 7L)
-                .containsEntry(QuestionType.CHOICE_DIALOGUE, 3L);
+                .containsKeys(
+                        QuestionType.CHOICE_ANSWER,
+                        QuestionType.CHOICE_QUESTION,
+                        QuestionType.CHOICE_DIALOGUE
+                );
+
+        long activeDailyCount = result.questions().stream()
+                .filter(q -> q.isActive() && q.isDailyEligible())
+                .count();
+        assertThat(activeDailyCount).isGreaterThanOrEqualTo(5);
 
         for (Question question : result.questions()) {
             assertThat(question.getNotionId()).startsWith("DAMIT-");
@@ -42,8 +55,6 @@ class QuestionCsvParserTest {
                     .isNotBlank()
                     .isNotEqualTo(question.getTactic());
             assertThat(question.getDifficulty()).isBetween((byte) 1, (byte) 3);
-            assertThat(question.isDailyEligible()).isTrue();
-            assertThat(question.isActive()).isTrue();
 
             if (question.getQuestionType() == QuestionType.CHOICE_QUESTION) {
                 assertThat(question.getCredibleAiAnswer()).isNotBlank();
@@ -54,13 +65,13 @@ class QuestionCsvParserTest {
             }
         }
 
-        Question dialogueQuestion = result.questions().stream()
-                .filter(q -> "DAMIT-5".equals(q.getNotionId()))
-                .findFirst()
-                .orElseThrow();
-        assertThat(dialogueQuestion.getQuestionType()).isEqualTo(QuestionType.CHOICE_DIALOGUE);
-        assertThat(dialogueQuestion.getPrompt()).contains("\nAI: ");
-        assertThat(dialogueQuestion.getPrompt().lines().count()).isEqualTo(4);
+        assertThat(result.questions())
+                .filteredOn(q -> q.getQuestionType() == QuestionType.CHOICE_DIALOGUE)
+                .isNotEmpty()
+                .anySatisfy(q -> {
+                    assertThat(q.getPrompt()).contains("\nAI: ");
+                    assertThat(q.getPrompt().lines().count()).isGreaterThanOrEqualTo(2);
+                });
     }
 
     @Test

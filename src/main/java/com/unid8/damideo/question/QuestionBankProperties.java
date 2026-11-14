@@ -13,5 +13,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class QuestionBankProperties {
 
     private boolean enabled = true;
-    private String location = "classpath:data/문제은행 v1.4.csv";
+    private String location = "classpath:data/problemset.csv";
 }
