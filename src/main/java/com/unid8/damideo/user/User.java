@@ -70,6 +70,18 @@ public class User {
         return new User(deviceId, nickname);
     }
 
+    public void updateDailyStreak(int currentStreak, int longestStreak, LocalDate lastCompletedDate) {
+        this.currentStreak = currentStreak;
+        this.longestStreak = longestStreak;
+        this.lastCompletedDate = lastCompletedDate;
+    }
+
+    public void updateType(String currentType, String candidateType, LocalDate candidateSince) {
+        this.currentType = currentType;
+        this.candidateType = candidateType;
+        this.candidateSince = candidateSince;
+    }
+
     public void changeNickname(String nickname) {
         this.nickname = nickname;
     }

@@ -1,6 +1,7 @@
 package com.unid8.damideo.game;
 
 import com.unid8.damideo.question.AnswerPos;
+import com.unid8.damideo.user.UserRecordService;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,9 +15,11 @@ import org.springframework.stereotype.Component;
 public class JdbcGameAnswerAdapter implements GameAnswerPort {
 
     private final JdbcTemplate jdbcTemplate;
+    private final UserRecordService userRecordService;
 
-    public JdbcGameAnswerAdapter(JdbcTemplate jdbcTemplate) {
+    public JdbcGameAnswerAdapter(JdbcTemplate jdbcTemplate, UserRecordService userRecordService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userRecordService = userRecordService;
     }
 
     @Override
@@ -77,7 +80,7 @@ public class JdbcGameAnswerAdapter implements GameAnswerPort {
 
     @Override
     public void onGameCompleted(Long userId, Long gameSessionId) {
-        // 팀원 담당 UserRecordService.completeGame 연동 지점
+        userRecordService.completeGame(userId, gameSessionId);
     }
 
     private SubmittedGameAnswer findOne(Long gameSessionId, Long questionId) {

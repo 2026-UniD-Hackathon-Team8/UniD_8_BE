@@ -1,6 +1,7 @@
 package com.unid8.damideo.daily;
 
 import com.unid8.damideo.question.AnswerPos;
+import com.unid8.damideo.user.UserRecordService;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -16,9 +17,11 @@ import org.springframework.stereotype.Component;
 public class JdbcDailyAnswerAdapter implements DailyAnswerPort {
 
     private final JdbcTemplate jdbcTemplate;
+    private final UserRecordService userRecordService;
 
-    public JdbcDailyAnswerAdapter(JdbcTemplate jdbcTemplate) {
+    public JdbcDailyAnswerAdapter(JdbcTemplate jdbcTemplate, UserRecordService userRecordService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userRecordService = userRecordService;
     }
 
     @Override
@@ -80,7 +83,7 @@ public class JdbcDailyAnswerAdapter implements DailyAnswerPort {
 
     @Override
     public void onDailyCompleted(Long userId, LocalDate dailyDate) {
-        // 팀원 담당 UserRecordService.completeDaily 연동 지점
+        userRecordService.completeDaily(userId, dailyDate);
     }
 
     private SubmittedDailyAnswer findOne(Long userId, Long questionId, LocalDate dailyDate) {
