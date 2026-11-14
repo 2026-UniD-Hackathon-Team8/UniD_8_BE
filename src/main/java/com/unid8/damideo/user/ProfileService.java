@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ProfileService {
 
-    static final int REQUIRED_ANSWERS = 20;
+    static final int REQUIRED_ANSWERS = WeaknessTypeJudge.MIN_TOTAL;
     private static final List<String> CATEGORY_ORDER =
             Arrays.stream(QuestionCategory.values()).map(Enum::name).toList();
 

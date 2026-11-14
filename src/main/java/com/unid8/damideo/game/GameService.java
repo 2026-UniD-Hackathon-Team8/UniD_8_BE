@@ -11,12 +11,13 @@ import com.unid8.damideo.game.dto.GameSessionResponse;
 import com.unid8.damideo.game.dto.GameSessionResponse.GameQuestionItem;
 import com.unid8.damideo.game.dto.StartGameRequest;
 import com.unid8.damideo.question.AnswerPos;
+import com.unid8.damideo.question.AnswerPositions;
 import com.unid8.damideo.question.dto.AnswerRevealResponse;
 import com.unid8.damideo.question.Question;
 import com.unid8.damideo.question.QuestionCategory;
 import com.unid8.damideo.question.QuestionPicker;
+import com.unid8.damideo.question.UserAnswerStatsPort;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -32,17 +33,20 @@ public class GameService {
     private final GameSessionQuestionRepository gameSessionQuestionRepository;
     private final QuestionPicker questionPicker;
     private final GameAnswerPort gameAnswerPort;
+    private final UserAnswerStatsPort userAnswerStatsPort;
     private final int defaultQuestionCount;
 
     public GameService(GameSessionRepository gameSessionRepository,
                        GameSessionQuestionRepository gameSessionQuestionRepository,
                        QuestionPicker questionPicker,
                        GameAnswerPort gameAnswerPort,
+                       UserAnswerStatsPort userAnswerStatsPort,
                        @Value("${damideo.game.default-question-count:10}") int defaultQuestionCount) {
         this.gameSessionRepository = gameSessionRepository;
         this.gameSessionQuestionRepository = gameSessionQuestionRepository;
         this.questionPicker = questionPicker;
         this.gameAnswerPort = gameAnswerPort;
+        this.userAnswerStatsPort = userAnswerStatsPort;
         this.defaultQuestionCount = defaultQuestionCount;
     }
 
@@ -61,13 +65,12 @@ public class GameService {
         }
 
         GameSession session = gameSessionRepository.save(new GameSession(userId, mode, picked.size()));
-        Random posRandom = new Random();
+        List<AnswerPos> positions = AnswerPositions.balanced(picked.size(), new Random());
 
         List<GameSessionQuestion> savedQuestions = new ArrayList<>(picked.size());
         for (int i = 0; i < picked.size(); i++) {
-            AnswerPos answerPos = posRandom.nextBoolean() ? AnswerPos.A : AnswerPos.B;
             savedQuestions.add(gameSessionQuestionRepository.save(
-                    new GameSessionQuestion(session, picked.get(i), i + 1, answerPos)
+                    new GameSessionQuestion(session, picked.get(i), i + 1, positions.get(i))
             ));
         }
 
@@ -159,9 +162,8 @@ public class GameService {
             }
         }
 
-        List<CategoryWrongCount> categoryWrongCounts = wrongByCategory.entrySet().stream()
-                .sorted(Map.Entry.<QuestionCategory, Integer>comparingByValue(Comparator.reverseOrder())
-                        .thenComparing(e -> e.getKey().ordinal()))
+        List<CategoryWrongCount> categoryWrongCounts = CategoryWrongRanking
+                .sort(wrongByCategory, userAnswerStatsPort.findCategoryAccuracies(userId)).stream()
                 .map(e -> new CategoryWrongCount(e.getKey(), e.getKey().displayName(), e.getValue()))
                 .toList();
 
