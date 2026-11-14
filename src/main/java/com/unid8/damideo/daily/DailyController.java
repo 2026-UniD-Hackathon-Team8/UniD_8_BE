@@ -5,7 +5,7 @@ import com.unid8.damideo.common.response.ApiResponse;
 import com.unid8.damideo.daily.dto.DailyAnswerRequest;
 import com.unid8.damideo.daily.dto.DailyResponse;
 import com.unid8.damideo.daily.dto.DailyResultResponse;
-import com.unid8.damideo.question.AnswerRevealResponse;
+import com.unid8.damideo.question.dto.AnswerRevealResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

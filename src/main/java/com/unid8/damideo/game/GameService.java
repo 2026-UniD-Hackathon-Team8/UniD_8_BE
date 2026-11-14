@@ -11,7 +11,7 @@ import com.unid8.damideo.game.dto.GameSessionResponse;
 import com.unid8.damideo.game.dto.GameSessionResponse.GameQuestionItem;
 import com.unid8.damideo.game.dto.StartGameRequest;
 import com.unid8.damideo.question.AnswerPos;
-import com.unid8.damideo.question.AnswerRevealResponse;
+import com.unid8.damideo.question.dto.AnswerRevealResponse;
 import com.unid8.damideo.question.Question;
 import com.unid8.damideo.question.QuestionCategory;
 import com.unid8.damideo.question.QuestionPicker;
