@@ -59,7 +59,7 @@ class GameApiTest {
                 DEVICE_ID, "게임테스터"
         );
 
-        String[] tactics = {"FAKE_SOURCE", "OUT_OF_CONTEXT", "FALSE_CAUSALITY"};
+        String[] tactics = {"FAKE_SOURCE", "MISSING_CONDITION", "FALSE_CAUSALITY"};
         for (QuestionCategory cat : QuestionCategory.values()) {
             for (int i = 0; i < 3; i++) {
                 jdbcTemplate.update(
