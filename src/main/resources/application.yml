@@ -38,4 +38,4 @@ damideo:
     default-question-count: 10
   question-bank:
     enabled: true
-    location: classpath:data/문제은행 v1.4.csv
+    location: classpath:data/problemset.csv

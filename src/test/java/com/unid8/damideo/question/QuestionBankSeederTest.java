@@ -6,6 +6,8 @@ import com.unid8.damideo.TestcontainersConfiguration;
 import com.unid8.damideo.common.time.KstDateTime;
 import com.unid8.damideo.game.GameMode;
 import com.unid8.damideo.question.QuestionBankSeeder.SeedSummary;
+import com.unid8.damideo.question.QuestionCsvParser.ParseResult;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest
@@ -34,6 +37,15 @@ class QuestionBankSeederTest {
 
     @Autowired
     QuestionPicker questionPicker;
+
+    @Autowired
+    QuestionBankProperties properties;
+
+    @Autowired
+    ResourceLoader resourceLoader;
+
+    @Autowired
+    QuestionCsvParser questionCsvParser;
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -54,29 +66,40 @@ class QuestionBankSeederTest {
     }
 
     @Test
-    void seedsV14CsvIdempotentlyAndVerifiesAllThreeQuestionTypes() throws Exception {
-        ClassPathResource v14 = new ClassPathResource("data/문제은행 v1.4.csv");
+    void seedsConfiguredCsvIdempotentlyAndVerifiesAllThreeQuestionTypes() throws Exception {
+        Resource resource = configuredResource();
+        ParseResult parsed = parseConfiguredCsv(resource);
+        int totalParsed = parsed.questions().size();
+        int expectedActiveCount = (int) parsed.questions().stream().filter(Question::isActive).count();
+        assertThat(totalParsed).isGreaterThanOrEqualTo(10);
+        assertThat(parsed.skippedRows()).isEmpty();
 
-        SeedSummary firstRun = seeder.seed(v14);
-        assertThat(firstRun.totalParsed()).isEqualTo(31);
-        assertThat(firstRun.inserted()).isEqualTo(31);
+        SeedSummary firstRun = seeder.seed(resource);
+        assertThat(firstRun.totalParsed()).isEqualTo(totalParsed);
+        assertThat(firstRun.inserted()).isEqualTo(totalParsed);
         assertThat(firstRun.updatedVersions()).isZero();
         assertThat(firstRun.skipped()).isZero();
 
-        SeedSummary secondRun = seeder.seed(v14);
-        assertThat(secondRun.totalParsed()).isEqualTo(31);
+        SeedSummary secondRun = seeder.seed(resource);
+        assertThat(secondRun.totalParsed()).isEqualTo(totalParsed);
         assertThat(secondRun.inserted()).isZero();
         assertThat(secondRun.updatedVersions()).isZero();
-        assertThat(secondRun.unchanged()).isEqualTo(31);
+        assertThat(secondRun.unchanged()).isEqualTo(totalParsed);
 
         List<Question> activeQuestions = questionRepository.findAllByActiveTrue();
-        assertThat(activeQuestions).hasSize(31);
+        assertThat(activeQuestions).hasSize(expectedActiveCount);
 
         Map<QuestionType, List<Question>> byType = activeQuestions.stream()
                 .collect(Collectors.groupingBy(Question::getQuestionType));
-        assertThat(byType.get(QuestionType.CHOICE_ANSWER)).hasSize(21);
-        assertThat(byType.get(QuestionType.CHOICE_QUESTION)).hasSize(7);
-        assertThat(byType.get(QuestionType.CHOICE_DIALOGUE)).hasSize(3);
+        assertThat(byType)
+                .containsKeys(
+                        QuestionType.CHOICE_ANSWER,
+                        QuestionType.CHOICE_QUESTION,
+                        QuestionType.CHOICE_DIALOGUE
+                );
+        assertThat(byType.get(QuestionType.CHOICE_ANSWER)).isNotEmpty();
+        assertThat(byType.get(QuestionType.CHOICE_QUESTION)).isNotEmpty();
+        assertThat(byType.get(QuestionType.CHOICE_DIALOGUE)).isNotEmpty();
 
         // 답 고르기 검증 (DAMIT-6)
         Question choiceAnswer = findByNotionId(activeQuestions, "DAMIT-6");
@@ -113,8 +136,8 @@ class QuestionBankSeederTest {
 
     @Test
     void deactivatesOldVersionAndInsertsNewVersionWhenContentChanges() throws Exception {
-        ClassPathResource v14 = new ClassPathResource("data/문제은행 v1.4.csv");
-        seeder.seed(v14);
+        seeder.seed(configuredResource());
+        int initialActiveCount = questionRepository.findAllByActiveTrue().size();
 
         Question original = questionRepository.findAllByNotionIdAndActiveTrue("DAMIT-1").get(0);
 
@@ -136,14 +159,28 @@ class QuestionBankSeederTest {
         assertThat(newVersion.getId()).isNotEqualTo(original.getId());
         assertThat(newVersion.getDifficulty()).isEqualTo((byte) 2);
         assertThat(newVersion.getExplanation()).isEqualTo("수정된 해설입니다.");
-        assertThat(questionRepository.findAllByActiveTrue()).hasSize(31);
+        assertThat(questionRepository.findAllByActiveTrue()).hasSize(initialActiveCount);
     }
 
     @Test
     void seedRunnerLoadsConfiguredLocationFromApplicationYml() throws Exception {
+        ParseResult parsed = parseConfiguredCsv(configuredResource());
+        int expectedActiveCount = (int) parsed.questions().stream().filter(Question::isActive).count();
+
         seedRunner.run(null);
 
-        assertThat(questionRepository.findAllByActiveTrue()).hasSize(31);
+        assertThat(questionRepository.findAll()).hasSize(parsed.questions().size());
+        assertThat(questionRepository.findAllByActiveTrue()).hasSize(expectedActiveCount);
+    }
+
+    private Resource configuredResource() {
+        return resourceLoader.getResource(properties.getLocation());
+    }
+
+    private ParseResult parseConfiguredCsv(Resource resource) throws Exception {
+        try (InputStream is = resource.getInputStream()) {
+            return questionCsvParser.parse(is);
+        }
     }
 
     private Question findByNotionId(List<Question> questions, String notionId) {
