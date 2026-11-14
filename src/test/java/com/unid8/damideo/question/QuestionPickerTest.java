@@ -68,7 +68,7 @@ class QuestionPickerTest {
     }
 
     @Test
-    void 연승_문제_선정은_오늘_데일리를_제외하고_안푼_틀린_맞힌_순서를_따른다() {
+    void pickForStreakExcludesTodayDailyAndPrioritizesUnsolvedWrongCorrect() {
         Optional<Question> first = questionPicker.pickForStreak(userId, Set.of());
         assertThat(first).isPresent();
         assertThat(first.get().getId()).isEqualTo(unsolvedQId);

@@ -76,8 +76,9 @@ class GameApiTest {
         }
     }
 
+    // 판을_시작하고_이어하기_후_모두_풀면_결과를_조회할_수_있다
     @Test
-    void 판을_시작하고_이어하기_후_모두_풀면_결과를_조회할_수_있다() throws Exception {
+    void startGameResumeSubmitAllAndGetResult() throws Exception {
         // 1. 첫 판 시작 (10문제)
         MvcResult firstGame = mockMvc.perform(post("/api/games")
                         .header(DeviceId.HEADER, DEVICE_ID)

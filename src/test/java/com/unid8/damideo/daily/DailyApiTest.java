@@ -77,8 +77,9 @@ class DailyApiTest {
         }
     }
 
+    // 오늘의_데일리를_조회하고_5문제를_모두_풀면_결과를_조회할_수_있다
     @Test
-    void 오늘의_데일리를_조회하고_5문제를_모두_풀면_결과를_조회할_수_있다() throws Exception {
+    void getTodayDailySubmitAllAndGetResult() throws Exception {
         // 1. 데일리 조회: 5문제 반환 및 정답/해설 미포함 확인
         MvcResult dailyRes = mockMvc.perform(get("/api/daily").header(DeviceId.HEADER, DEVICE_ID))
                 .andExpect(status().isOk())
