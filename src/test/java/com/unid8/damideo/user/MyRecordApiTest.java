@@ -95,7 +95,7 @@ class MyRecordApiTest {
                 .andExpect(jsonPath("$.data.scoreTrend.length()").value(0));
     }
 
-    // 점수 추이는 약점 재도전을 빼고, 계열별 정답률은 처음 3회와 최근 3회로 비교한다
+    // 점수 추이는 약점 재도전을 빼고, 계열별 정답률은 처음과 최근을 겹치지 않게 비교한다 (4회면 2회 vs 2회)
     @Test
     void growth_trendAndCategoryAccuracy() throws Exception {
         String device = UUID.randomUUID().toString();
@@ -122,11 +122,31 @@ class MyRecordApiTest {
                 .andExpect(jsonPath("$.data.scoreTrend[0].total").value(2))
                 .andExpect(jsonPath("$.data.scoreTrend[0].sessionType").value("GAME"))
                 .andExpect(jsonPath("$.data.categoryAccuracy[0].category").value("EVIDENCE"))
-                .andExpect(jsonPath("$.data.categoryAccuracy[0].early").value(0.5))
+                .andExpect(jsonPath("$.data.categoryAccuracy[0].early").value(0.33))
                 .andExpect(jsonPath("$.data.categoryAccuracy[0].recent").value(1.0))
                 .andExpect(jsonPath("$.data.categoryAccuracy[1].early").isEmpty())
                 .andExpect(jsonPath("$.data.typeHistory[0].code").value("EVIDENCE_TRUSTER"))
                 .andExpect(jsonPath("$.data.typeHistory[0].name").value("근거 맹신형"));
+    }
+
+    // 3회면 첫 회와 마지막 회를 비교해서, 처음과 최근이 같은 값으로 나오지 않는다
+    @Test
+    void growth_threeSessionsCompareFirstAndLast() throws Exception {
+        String device = UUID.randomUUID().toString();
+        Long userId = newUser(device);
+        LocalDateTime base = LocalDateTime.of(2026, 11, 10, 3, 0);
+        Long g1 = newGame(userId, "NORMAL", "COMPLETED");
+        addGameAnswer(userId, g1, newQuestion("LOGIC"), false, base);
+        Long g2 = newGame(userId, "NORMAL", "COMPLETED");
+        addGameAnswer(userId, g2, newQuestion("LOGIC"), false, base.plusDays(1));
+        Long g3 = newGame(userId, "NORMAL", "COMPLETED");
+        addGameAnswer(userId, g3, newQuestion("LOGIC"), true, base.plusDays(2));
+
+        get(device, "/api/users/me/growth")
+                .andExpect(jsonPath("$.data.available").value(true))
+                .andExpect(jsonPath("$.data.categoryAccuracy[2].category").value("LOGIC"))
+                .andExpect(jsonPath("$.data.categoryAccuracy[2].early").value(0.0))
+                .andExpect(jsonPath("$.data.categoryAccuracy[2].recent").value(1.0));
     }
 
     private ResultActions get(String device, String url) throws Exception {

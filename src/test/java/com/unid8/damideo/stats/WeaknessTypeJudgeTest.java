@@ -17,9 +17,9 @@ class WeaknessTypeJudgeTest {
     private static final LocalDate TODAY = LocalDate.of(2026, 11, 15);
 
     @Test
-    void 한_계열이라도_3문제면_유형이_열리지_않는다() {
+    void 한_계열이라도_1문제면_유형이_열리지_않는다() {
         Map<String, List<Boolean>> answers = allSame(6, 4);
-        answers.put("LOGIC", answers(3, 1));
+        answers.put("LOGIC", answers(1, 1));
 
         TypeJudgement result = judge(answers, TypeState.empty());
 
@@ -28,9 +28,9 @@ class WeaknessTypeJudgeTest {
     }
 
     @Test
-    void 모든_계열이_4문제면_유형이_열린다() {
-        Map<String, List<Boolean>> answers = allSame(4, 3);
-        answers.put("TIMELINE", answers(4, 1));
+    void 모든_계열이_2문제면_유형이_열린다() {
+        Map<String, List<Boolean>> answers = allSame(2, 2);
+        answers.put("TIMELINE", answers(2, 1));
 
         TypeJudgement result = judge(answers, TypeState.empty());
 
