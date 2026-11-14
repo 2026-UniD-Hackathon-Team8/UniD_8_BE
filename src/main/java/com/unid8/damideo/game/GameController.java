@@ -10,6 +10,7 @@ import com.unid8.damideo.question.dto.AnswerRevealResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,10 +36,12 @@ public class GameController {
         return ApiResponse.ok("GAME_STARTED", "실전 판을 시작했습니다.", gameService.startGame(userId, request));
     }
 
-    @Operation(summary = "진행 중인 판 이어 하기", description = "현재 진행 중(IN_PROGRESS)인 판의 문제 목록과 진행 상태를 조회합니다.")
+    @Operation(summary = "진행 중인 판 이어 하기", description = "현재 진행 중(IN_PROGRESS)인 판의 문제 목록과 진행 상태를 조회합니다. 진행 중인 판이 없으면 204를 반환합니다.")
     @GetMapping("/current")
-    public ApiResponse<GameSessionResponse> getCurrentGame(@CurrentUser Long userId) {
-        return ApiResponse.ok("GAME_FETCHED", "진행 중인 판을 조회했습니다.", gameService.getCurrentGame(userId));
+    public ResponseEntity<ApiResponse<GameSessionResponse>> getCurrentGame(@CurrentUser Long userId) {
+        return gameService.getCurrentGame(userId)
+                .map(game -> ResponseEntity.ok(ApiResponse.ok("GAME_FETCHED", "진행 중인 판을 조회했습니다.", game)))
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @Operation(summary = "판 답 제출", description = "판 문제 1개에 답을 제출하고 정답·해설을 반환합니다. 마지막 문제 제출 시 판이 완료됩니다.")
