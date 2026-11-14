@@ -109,6 +109,8 @@ class DailyApiTest {
                                 """.formatted(firstQId)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.selectedPos").value("A"))
+                .andExpect(jsonPath("$.data.tactic").value("FAKE_SOURCE"))
+                .andExpect(jsonPath("$.data.tacticName").value("가짜 출처"))
                 .andExpect(jsonPath("$.data.explanation").value("해설입니다"))
                 .andExpect(jsonPath("$.data.completed").value(false))
                 .andReturn();
