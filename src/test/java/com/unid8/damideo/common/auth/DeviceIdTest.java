@@ -29,6 +29,7 @@ class DeviceIdTest {
     @Autowired
     MockMvc mockMvc;
 
+    // 등록된 기기면 사용자 id를 받는다
     @Test
     void registeredDeviceReturnsUserId() throws Exception {
         mockMvc.perform(get("/api/sample/me").header(DeviceId.HEADER, REGISTERED))
@@ -36,6 +37,7 @@ class DeviceIdTest {
                 .andExpect(jsonPath("$.data").value(1));
     }
 
+    // 헤더가_없으면_401_USER_NOT_FOUND
     @Test
     void missingHeaderReturns401UserNotFound() throws Exception {
         mockMvc.perform(get("/api/sample/me"))
@@ -44,6 +46,7 @@ class DeviceIdTest {
                 .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
     }
 
+    // 형식이_UUID가_아니면_400_INVALID_INPUT
     @Test
     void invalidUuidFormatReturns400InvalidInput() throws Exception {
         mockMvc.perform(get("/api/sample/me").header(DeviceId.HEADER, "abc"))
@@ -52,6 +55,7 @@ class DeviceIdTest {
                 .andExpect(jsonPath("$.errors['X-Device-Id']").exists());
     }
 
+    // 등록되지_않은_기기면_401_USER_NOT_FOUND
     @Test
     void unregisteredDeviceReturns401UserNotFound() throws Exception {
         mockMvc.perform(get("/api/sample/me").header(DeviceId.HEADER, UNREGISTERED))
@@ -59,6 +63,7 @@ class DeviceIdTest {
                 .andExpect(jsonPath("$.code").value("USER_NOT_FOUND"));
     }
 
+    // 게스트_생성_주소는_헤더_없이_통과한다
     @Test
     void guestSignupEndpointPermitsWithoutHeader() throws Exception {
         mockMvc.perform(post("/api/users"))
