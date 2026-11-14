@@ -32,3 +32,7 @@ management:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+
+damideo:
+  game:
+    default-question-count: 10
